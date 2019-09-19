@@ -1,17 +1,18 @@
-# IC-7300-time-sync
+# IC-7300-time-sync-args
 Python3 script to sync the radio's clock with your computer via CAT commands.
+Originally written by Kevin Loughin KB9RLW in Python for Linux and now modified to run on Windows like an EXE.
 
-At the top of the script are a few variables you'll have to set.  The serial device name your 7300 is at, a GMT offset if your computer clock is set to local time and you want the radio on GMT.   The rest of the script is commented and should be self-explainatory.  
+The script, now and EXE, also accept parameters on command line instead of modify the variables valus inside.
 
-You can run it manually from the terminal, or set it up as a cron job to automatically update the radio clock at an interval.  
+You can run it manually from the terminal (cmd.exE), or set it up as a scheduled task to automatically update the radio clock at an interval.  
 
-After downloading the script, you'll need to mark it as executable.  From the terminal, you can do this with the following command.
-chown +x {script name}
-From most desktops, you can right-click on the script and select properties.  Under the permissions tab, there should be a check box to "allow executing as a program".
+After downloading the script, you can run it as executable.  
 
-To make the script accessible system wide, you can copy it,  as the root user, to the /usr/bin directory.
-sudo cp ./{script name} /usr/bin
+From most desktops, you can right-click on the EXE and create a shortcut on the desktop and next you can select properties and in the "Destination" field insert the two paramters required (baud speed and COM port). In this way, you can also run the program with a classic 
+double-click from your desktop.
 
 When run, the script will get the current time of your computer, wait for the top of the minute at 00 seconds, and set the radio's time.
 
-There is a demo video on my you tube channel.  Search you tube for KB9RLW python to find it, or copy the video link below.
+Thanks to Kevin Loughin - KB9RLW for the solution and the initial effort.
+
+-Graziano IW2NOY-
