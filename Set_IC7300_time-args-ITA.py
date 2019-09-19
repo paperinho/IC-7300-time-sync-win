@@ -84,7 +84,7 @@ ser = serial.Serial(serialport, baudrate)
 count = 0
 while(count < 11):
     senddata = int(bytes(preamble[count], 'UTF-8'), 16)
-    # Aggiunta di IW2NOY per debugging dei dati inviati al cesso
+    # Aggiunta di IW2NOY per debugging dei dati inviati
     #dati = str(senddata)
     #giro = str(count)
     #print ("Dati inviati a IC-7300 al giro " + giro  + " : " + dati)
