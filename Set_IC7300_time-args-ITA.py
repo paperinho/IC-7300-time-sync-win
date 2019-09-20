@@ -84,21 +84,62 @@ else:
             lastsec = seconds
     time.sleep(.01)
 
+    # Added by IW2NOY to synchronize also date with time
+    preambledate = ["0xFE", "0xFE", "0x94", "0xE0", "0x1A", "0x05", "0x00", "0x95"]
+    import datetime
+
+    # Get today date
+    from datetime import date
+    today = date.today()
+    year = today.strftime("%y")
+    month = today.strftime("%m")
+    day = today.strftime("%d")
+
+    # Preparing hexcode for today date
+    preyear = "0x20" 
+    year = "0x" + str(year)
+    month = "0x" + str(month)
+    day = "0x" + str(day)
+    # print( year + " " + month + " " + day)
+
+    preambledate.append(preyear)
+    preambledate.append(year)
+    preambledate.append(month)
+    preambledate.append(day)
+    preambledate.append('0xFD')
+    #print(" ")
+    #print("Preamble date: " + str(preambledate))
+    #print(" ")
+
+    # End section for date
+
     # Now that we've reached the top of the minute, set the radios time!
     ser = serial.Serial(serialport, baudrate)
 
     count = 0
     while(count < 11):
         senddata = int(bytes(preamble[count], 'UTF-8'), 16)
-        # Aggiunta di IW2NOY per debugging dei dati inviati
-        #dati = str(senddata)
-        #giro = str(count)
-        #print ("Dati inviati a IC-7300 al giro " + giro  + " : " + dati)
-        # Fine aggiunta
+        #Aggiunta di IW2NOY per debugging dei dati inviati
+        #print ("Dati inviati a IC-7300 per l'orario al giro " + giro  + " : " + dati)
+        #print ("Preamble:" + str(preamble))
+        #Fine aggiunta
         ser.write(struct.pack('>B', senddata))
+        count = count +1
+    
+    # Send date after time
+    count = 0
+    while(count < 13):
+        senddata2 = int(bytes(preambledate[count], 'UTF-8'), 16)
+        #Aggiunta di IW2NOY per debugging dei dati inviati
+        #dati = str(senddata2)
+        #giro = str(count)
+        #print ("Dati inviati a IC-7300 per la data al giro " + giro  + " : " + dati)
+        #print ("Preambledate:" + str(preambledate))
+        #Fine aggiunta
+        ser.write(struct.pack('>B', senddata2))
         count = count +1
 
     ser.close()
 
-    print ("Dati inviati correttamente a IC-7300! L'orario dovrebbe essere stato sincronizzato!")
+    print ("Dati inviati correttamente a IC-7300! L'orario e la data dovrebbero essere stati sincronizzati!")
     # All done.  The radio is now in sync with the computer clock.
