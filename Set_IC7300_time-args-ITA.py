@@ -16,83 +16,89 @@
 #Aggiunta import della libreria sys per la gestione degli argomenti su command line
 import sys
 
-baudrate = int(sys.argv[1])  #change to match your radio
-gmtoffset = 0  #change to a negative or positive offset from GMT if you
-#               want to use local time.  i.e. -5 for EST
-serialport = str(sys.argv[2])  # Serial port of your radios serial interface.
-baudratestr = str(baudrate)
+# Check for args on command line, otherwise exit with help
+if len(sys.argv) < 3:
+    print ("Errore! Devi fornire due argomenti sulla riga di comando, prima la velocità in baud e poi la porta COM dove è collegato l'IC-7300!")
+    print ("Esempio: " + (sys.argv[0]) + " 19200 COM3")
+else:
 
-# Defining the command to set the radios time in hex bytes.
-preamble = ["0xFE", "0xFE", "0x94", "0xE0", "0x1A", "0x05", "0x00", "0x95"]
-postamble = "0xfd"
+    baudrate = int(sys.argv[1])  #change to match your radio
+    gmtoffset = 0  #change to a negative or positive offset from GMT if you
+    #               want to use local time.  i.e. -5 for EST
+    serialport = str(sys.argv[2])  # Serial port of your radios serial interface.
+    baudratestr = str(baudrate)
 
-# Windows chatting
-#
-print ("")
-print ("Sto veramente funzionando su MS Winzozz, grazie a IW2NOY ! :-)")
-print ("Servo per sincronizzare l'orario GMT del PC su IC-7300...")
-print ("Mi connetterò sulla porta " + serialport + " alla velocità di " + baudratestr)
-print("")
-print("Attenderò che l'orario raggiunga i secondi 00, prima di inviare i dati al IC-7300")
-print("")
-#Import libraries we'll need to use
-import time
-import serial
-import struct
+    # Defining the command to set the radios time in hex bytes.
+    preamble = ["0xFE", "0xFE", "0x94", "0xE0", "0x1A", "0x05", "0x00", "0x95"]
+    postamble = "0xfd"
 
-# Here we get the computers current time in hours and minutes.
-# Add in the offset, if any, and roll over if we exceed 23 or go below 0
-# hours.  Finally appending hex byte formated time data to the command string.
-t = time.localtime()
-hours = time.strftime("%H")
-hours = int(hours) + gmtoffset
-if hours < 0:
-    hours = 23 + hours
-if hours > 23:
-    hours = 23 - hours
-hours = str(hours)
+    # Windows chatting
+    #
+    print ("")
+    print ("Sto veramente funzionando su MS Winzozz, grazie a IW2NOY ! :-)")
+    print ("Servo per sincronizzare l'orario GMT del PC su IC-7300...")
+    print ("Mi connetterò sulla porta " + serialport + " alla velocità di " + baudratestr)
+    print("")
+    print("Attenderò che l'orario raggiunga i secondi 00, prima di inviare i dati al IC-7300")
+    print("")
+    #Import libraries we'll need to use
+    import time
+    import serial
+    import struct
 
-if (len(hours) < 2):
-    hours = "0" + str(hours)
-hours = "0x" + hours
-preamble.append(hours)
+    # Here we get the computers current time in hours and minutes.
+    # Add in the offset, if any, and roll over if we exceed 23 or go below 0
+    # hours.  Finally appending hex byte formated time data to the command string.
+    t = time.localtime()
+    hours = time.strftime("%H")
+    hours = int(hours) + gmtoffset
+    if hours < 0:
+        hours = 23 + hours
+    if hours > 23:
+        hours = 23 - hours
+    hours = str(hours)
 
-minutes = (int(time.strftime("%M")) + 1)
-minutes = str(minutes)
-if (len(minutes) < 2):
-    minutes = "0" + minutes
-minutes = "0x" + minutes
-preamble.append(minutes)
-preamble.append('0xFD')
+    if (len(hours) < 2):
+        hours = "0" + str(hours)
+    hours = "0x" + hours
+    preamble.append(hours)
 
-# Now I get the current computer time in seconds.  Needed to set the time only
-# at the top of the minute.
-seconds = int(time.strftime("%S"))
+    minutes = (int(time.strftime("%M")) + 1)
+    minutes = str(minutes)
+    if (len(minutes) < 2):
+        minutes = "0" + minutes
+    minutes = "0x" + minutes
+    preamble.append(minutes)
+    preamble.append('0xFD')
 
-# Now we wait for the top of the minute.
-lastsec = 1
-while(seconds != 0):
-   t = time.localtime()
-   seconds = int(time.strftime("%S"))
-   if(seconds != lastsec):
-        lastsec = seconds
-   time.sleep(.01)
+    # Now I get the current computer time in seconds.  Needed to set the time only
+    # at the top of the minute.
+    seconds = int(time.strftime("%S"))
 
-# Now that we've reached the top of the minute, set the radios time!
-ser = serial.Serial(serialport, baudrate)
+    # Now we wait for the top of the minute.
+    lastsec = 1
+    while(seconds != 0):
+        t = time.localtime()
+        seconds = int(time.strftime("%S"))
+    if(seconds != lastsec):
+            lastsec = seconds
+    time.sleep(.01)
 
-count = 0
-while(count < 11):
-    senddata = int(bytes(preamble[count], 'UTF-8'), 16)
-    # Aggiunta di IW2NOY per debugging dei dati inviati
-    #dati = str(senddata)
-    #giro = str(count)
-    #print ("Dati inviati a IC-7300 al giro " + giro  + " : " + dati)
-    # Fine aggiunta
-    ser.write(struct.pack('>B', senddata))
-    count = count +1
+    # Now that we've reached the top of the minute, set the radios time!
+    ser = serial.Serial(serialport, baudrate)
 
-ser.close()
+    count = 0
+    while(count < 11):
+        senddata = int(bytes(preamble[count], 'UTF-8'), 16)
+        # Aggiunta di IW2NOY per debugging dei dati inviati
+        #dati = str(senddata)
+        #giro = str(count)
+        #print ("Dati inviati a IC-7300 al giro " + giro  + " : " + dati)
+        # Fine aggiunta
+        ser.write(struct.pack('>B', senddata))
+        count = count +1
 
-print ("Dati inviati correttamente a IC-7300! L'orario dovrebbe essere stato sincronizzato!")
-# All done.  The radio is now in sync with the computer clock.
+    ser.close()
+
+    print ("Dati inviati correttamente a IC-7300! L'orario dovrebbe essere stato sincronizzato!")
+    # All done.  The radio is now in sync with the computer clock.
