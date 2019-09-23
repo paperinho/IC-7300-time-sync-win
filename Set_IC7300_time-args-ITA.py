@@ -108,7 +108,7 @@ else:
     preambledate.append(day)
     preambledate.append('0xFD')
     #print(" ")
-    print("Preamble date: " + str(preambledate))
+    #print("Preamble date: " + str(preambledate))
     #print(" ")
 
     # End section for date
