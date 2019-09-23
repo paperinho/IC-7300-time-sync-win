@@ -96,13 +96,13 @@ else:
     day = today.strftime("%d")
 
     # Preparing hexcode for today date
-    preyear = "0x20" 
+    #preyear = "0x20" 
     year = "0x" + str(year)
     month = "0x" + str(month)
     day = "0x" + str(day)
     # print( year + " " + month + " " + day)
 
-    preambledate.append(preyear)
+    #preambledate.append(preyear)
     preambledate.append(year)
     preambledate.append(month)
     preambledate.append(day)
@@ -129,7 +129,7 @@ else:
     
     # Send date after time
     count = 0
-    while(count < 13):
+    while(count < 12):
         senddata2 = int(bytes(preambledate[count], 'UTF-8'), 16)
         #Aggiunta di IW2NOY per debugging dei dati inviati
         #dati = str(senddata2)
