@@ -1,6 +1,6 @@
 #! /d/Python/Python37/python
 
-from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QGridLayout, QLabel, QComboBox
+from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QGridLayout, QLabel, QComboBox, QMessageBox, QProgressBar
 from PyQt5 import QtGui 
 
 # Application and windows design
@@ -9,18 +9,29 @@ window = QWidget()
 layout = QGridLayout()
 labelsel = QLabel('Selezionare la porta seriale:')
 combosel = QComboBox()
-labelsel = QLabel('Selezionare la velocità della porta seriale:')
+labelbaud = QLabel('Selezionare la velocità della porta seriale:')
 combobaud = QComboBox()
 combobaud.addItems(['4800', '9600', '19200', '38400', '57600', '115200'])
 labelapp = QLabel('IC-7300 Time & Date Sync by IW2NOY')
 buttonsync = QPushButton('Sync IC-7300!')
 buttonquit = QPushButton('Chiudi')
+progressbar = QProgressBar()
+
+# First row
 layout.addWidget(labelapp, 0,0,1,2)
 labelapp.setFont(QtGui.QFont("Verdana", 12, QtGui.QFont.Bold)) # This use QtGui
+# Second row
 layout.addWidget(labelsel, 1,0)
 layout.addWidget(combosel, 1,1)
-layout.addWidget(buttonquit, 2,0)
-layout.addWidget(buttonsync, 2,1)
+# Third row
+layout.addWidget(labelbaud, 2,0)
+layout.addWidget(combobaud, 2,1)
+# Fourth row
+layout.addWidget(buttonquit, 3,0)
+layout.addWidget(buttonsync, 3,1)
+# Fifth row
+layout.addWidget(progressbar, 4,0,1,2)
+
 window.setLayout(layout)
 app.setStyle('Fusion')
 
@@ -36,6 +47,22 @@ def get_serial():
     for port in ports :
         combosel.addItem(port.device)
 get_serial()
+
+# Routine to show a message that everything goes well
+def all_done():
+    alert = QMessageBox()
+    alert.setText('La radio è stata sincronizzata !')
+    alert.exec_()
+
+def wait_zero():
+    alert = QMessageBox()
+    alert.setText('Attendo che i secondi siano 00 prima di sincronizzare, non chiudere la app fino messaggio di completamento !')
+    alert.exec_()
+
+# def advanceProgressBar():
+#     curVal = progressbar.value()
+#     maxVal = progressbar.maximum()
+#     progressbar.setValue(curVal + (maxVal - curVal) / 100)
 
 def sync_radio():
     import sys
@@ -83,14 +110,25 @@ def sync_radio():
     seconds = int(time.strftime("%S"))
 
     # Now we wait for the top of the minute.
+    wait_zero()
+
     lastsec = 1
+    curVal = seconds
     while(seconds != 0):
         t = time.localtime()
         seconds = int(time.strftime("%S"))
+        #maxVal = progressbar.maximum()
+        maxVal = 60
+        progressbar.maximum = maxVal
+        curVal = seconds
+        #progressbar.setValue(curVal + (maxVal - curVal) / 100)
+        progressbar.setValue((curVal * 100)/ maxVal)
     if(seconds != lastsec):
             lastsec = seconds
     time.sleep(.01)
 
+    progressbar.setValue = maxVal
+    
     # Added by IW2NOY to synchronize also date with time
     preambledate = ["0xFE", "0xFE", "0x94", "0xE0", "0x1A", "0x05", "0x00", "0x95"]
     import datetime
@@ -147,7 +185,13 @@ def sync_radio():
         count = count +1
 
     ser.close()
+    all_done()
     # All done.  The radio is now in sync with the computer clock.
+
+# Define buttons calls
+
+buttonquit.clicked.connect(on_buttonquit_clicked)
+buttonsync.clicked.connect(sync_radio)
 
 # Finally show the windows GUI and run the application
 window.show()
