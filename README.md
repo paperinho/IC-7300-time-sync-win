@@ -4,6 +4,7 @@ Python3 script to sync the radio's clock with your computer via CAT commands.
 Originally written by Kevin Loughin KB9RLW in Python for Linux and now modified to run on Windows like an EXE by IW2NOY.
 
 ATTENTION: This EXE is a 64 bit program that can run only on Windows 64 bit platform. On Windows 32 bit platform it doesn't work !
+Update : I am working in a GUI version for Windows 64 bit.
 
 The script, now an EXE, also accept parameters on command line instead of modify the variables valus inside.
 
